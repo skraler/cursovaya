@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Визуализатор маршрутов — Прототип UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #1a2b42;
+            background: #eef2f6;
+            min-height: 100vh;
+        }
+        header {
+            background: #fff;
+            padding: 28px 40px;
+            border-bottom: 2px solid #c5d4e4;
+        }
+        header h1 { font-size: 1.65em; font-weight: 600; color: #0f2847; margin-bottom: 4px; }
+        header p { color: #4a6278; }
+        .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 14px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.88em; }
+        .priority-dot { width: 11px; height: 11px; border-radius: 50%; }
+        .priority-dot.p1 { background: #2d7a4a; }
+        .priority-dot.p2 { background: #c9a227; }
+        .priority-dot.p3 { background: #9aa8b5; }
+        main { padding: 36px 40px; }
+        .zone-section { margin-bottom: 36px; }
+        .zone-title {
+            font-size: 1.15em;
+            color: #2a4a6b;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #c5d4e4;
+        }
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+        }
+        .screen-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            background: #fff;
+            border: 1px solid #b8c9db;
+            border-radius: 6px;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .screen-link:hover {
+            border-color: #1e4a7a;
+            box-shadow: 0 3px 12px rgba(15, 40, 71, 0.1);
+        }
+        .priority-badge { font-size: 0.85em; font-weight: 600; white-space: nowrap; }
+        .priority-badge.p1 { color: #2d7a4a; }
+        .priority-badge.p2 { color: #9a7b18; }
+        .screen-name { font-weight: 500; }
+        .scope-note {
+            margin-top: 24px;
+            padding: 14px 18px;
+            background: #fff;
+            border-left: 4px solid #1e4a7a;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.92em;
+            color: #4a6278;
+        }
+        footer {
+            padding: 18px 40px;
+            color: #5a7085;
+            font-size: 0.88em;
+            border-top: 1px solid #c5d4e4;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Визуализатор кратчайших маршрутов</h1>
+        <p>Прототип интерфейса · алгоритм Дейкстры</p>
+        <div class="legend">
+            <div class="legend-item"><span class="priority-dot p1"></span><span>P1 — Критично</span></div>
+            <div class="legend-item"><span class="priority-dot p2"></span><span>P2 — Важно</span></div>
+            <div class="legend-item"><span class="priority-dot p3"></span><span>P3 — Исключено по решению</span></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="zone-section">
+            <h2 class="zone-title">Рабочая область</h2>
+            <div class="screens-grid">
+                <a href="workspace.html" class="screen-link">
+                    <span class="priority-badge p1">● P1</span>
+                    <span class="screen-name">Главный экран — редактор и маршрут</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="zone-section">
+            <h2 class="zone-title">Редактирование и анимация (P2)</h2>
+            <div class="screens-grid">
+                <a href="workspace.html#tools-edit" class="screen-link">
+                    <span class="priority-badge p2">◐ P2</span>
+                    <span class="screen-name">Режимы редактирования графа</span>
+                </a>
+                <a href="workspace.html#animation" class="screen-link">
+                    <span class="priority-badge p2">◐ P2</span>
+                    <span class="screen-name">Анимация Дейкстры (кнопка «Пуск»)</span>
+                </a>
+            </div>
+        </section>
+
+        <p class="scope-note">
+            <strong>Область прототипа:</strong> сохранение, загрузка и экспорт схемы не входят в дизайн (по вашему решению).
+            Анимация — кнопка «Пуск», пошаговое плавное закрашивание рёбер маршрута зелёным.
+        </p>
+    </main>
+
+    <footer>
+        <p>Прототип для утверждения дизайна · см. README.md для запуска локального сервера</p>
+    </footer>
+</body>
+</html>
