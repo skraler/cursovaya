@@ -1,0 +1,141 @@
+# Secrets and credentials
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env.*.local
+*.env
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+config/secrets.json
+secrets.yaml
+secrets.yml
+credentials.json
+credentials.yaml
+*.token
+*.password
+*.passwd
+*.auth
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn/
+.pnp.*
+.yarn-integrity
+.npm/
+.node_repl_history
+
+# Python
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+eggs/
+wheels/
+
+# Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+.mvn/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+
+# Go
+vendor/
+*.exe
+*.exe~
+*.dll
+*.test
+*.out
+go.work
+go.work.sum
+
+# Rust
+target/
+
+# Dart/Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+
+# PHP
+vendor/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+.vs/
+
+# OS and temp
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+
+# IDE (keep PLDF cursor commands tracked)
+.idea/
+*.sublime-*
+.fleet/
+.history/
+*.code-workspace
+.vscode-test/
+
+# Build artifacts
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.cache/
+.temp/
+.tmp/
+.parcel-cache/
+.turbo/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
