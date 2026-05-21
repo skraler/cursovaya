@@ -122,6 +122,62 @@ describe('store', () => {
     expect(listener.mock.calls[0][1]).toBe(ActionTypes.ADD_VERTEX);
   });
 
+  it('S8: PLAY_ROUTE_ANIMATION and TICK advance animation', () => {
+    const store = createStore();
+    const { a, b, d } = buildDemoGraphInStore(store);
+
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: a.id,
+      role: 'start',
+    });
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: b.id,
+      role: 'waypoint',
+    });
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: d.id,
+      role: 'finish',
+    });
+    store.dispatch(ActionTypes.BUILD_ROUTE);
+
+    store.dispatch(ActionTypes.PLAY_ROUTE_ANIMATION);
+    expect(store.getState().animation.isPlaying).toBe(true);
+    expect(store.getState().animation.highlightedEdgeId).toBe('e1');
+
+    store.dispatch(ActionTypes.ANIMATION_TICK);
+    expect(store.getState().animation.stepIndex).toBe(1);
+
+    store.dispatch(ActionTypes.ANIMATION_TICK);
+    expect(store.getState().animation.isPlaying).toBe(false);
+    expect(store.getState().animation.highlightedEdgeId).toBeNull();
+  });
+
+  it('S9: UPDATE_EDGE clears routeResult', () => {
+    const store = createStore();
+    const { a, b, d } = buildDemoGraphInStore(store);
+
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: a.id,
+      role: 'start',
+    });
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: d.id,
+      role: 'finish',
+    });
+    store.dispatch(ActionTypes.BUILD_ROUTE);
+    expect(store.getState().routeResult?.success).toBe(true);
+
+    store.dispatch(ActionTypes.OPEN_EDGE_EDITOR, { edgeId: 'e1' });
+    store.dispatch(ActionTypes.UPDATE_EDGE, {
+      edgeId: 'e1',
+      weight: 99,
+      directed: true,
+    });
+
+    expect(store.getState().routeResult).toBeNull();
+    expect(store.getState().graph.edges.get('e1')?.weight).toBe(99);
+  });
+
   it('S7: CLEAR_GRAPH resets state', () => {
     const store = createStore();
     buildDemoGraphInStore(store);

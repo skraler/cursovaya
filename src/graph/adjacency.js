@@ -45,6 +45,31 @@ export function removeAdjacencyEntry(adjacency, fromId, edgeId) {
  * @param {Map<string, AdjacencyEntry[]>} adjacency
  * @param {string} vertexId
  */
+/**
+ * @param {Map<string, AdjacencyEntry[]>} adjacency
+ * @param {string} edgeId
+ * @param {number} weight
+ */
+export function syncEdgeWeight(adjacency, edgeId, weight) {
+  for (const [fromId, entries] of adjacency.entries()) {
+    let changed = false;
+    const next = entries.map((entry) => {
+      if (entry.edgeId !== edgeId) {
+        return entry;
+      }
+      changed = true;
+      return { ...entry, weight };
+    });
+    if (changed) {
+      adjacency.set(fromId, next);
+    }
+  }
+}
+
+/**
+ * @param {Map<string, AdjacencyEntry[]>} adjacency
+ * @param {string} vertexId
+ */
 export function removeAllAdjacencyForVertex(adjacency, vertexId) {
   adjacency.delete(vertexId);
 

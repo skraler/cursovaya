@@ -2,6 +2,7 @@ import { renderToolbar, initToolbar } from './toolbar.js';
 import { renderRoutePanel, initRoutePanel } from './routePanel.js';
 import { initCanvasRenderer, renderCanvas } from './canvasRenderer.js';
 import { initEdgeModal } from './edgeModal.js';
+import { createAnimationController } from './animationController.js';
 
 /**
  * @param {HTMLElement} root
@@ -85,8 +86,10 @@ export function mountWorkspace(appRoot, store) {
   const canvasWrap = appRoot.querySelector('#canvas-wrap');
   const edgeModalOverlay = appRoot.querySelector('#edge-modal');
 
-  initToolbar(toolsPanel, store);
-  initRoutePanel(routePanel, store);
+  const animationController = createAnimationController(store);
+
+  initToolbar(toolsPanel, store, animationController);
+  initRoutePanel(routePanel, store, animationController);
   const canvasApi = initCanvasRenderer(canvasWrap, store);
   const edgeModal = initEdgeModal(edgeModalOverlay, store);
 

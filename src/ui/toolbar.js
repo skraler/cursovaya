@@ -14,7 +14,7 @@ const DATA_TOOL_TO_MODE = {
 
 /** @type {Record<string, string>} */
 export const MODE_HINTS = {
-  [TOOL_MODES.VERTEX]: 'Режим: вершина — клик на холсте',
+  [TOOL_MODES.VERTEX]: 'Режим: вершина — клик на холсте; двойной клик по ребру — вес',
   [TOOL_MODES.EDGE]: 'Режим: ребро — клик по двум вершинам',
   [TOOL_MODES.START]: 'Режим: старт — клик по вершине',
   [TOOL_MODES.WAYPOINT]: 'Режим: остановка — клик по вершине',
@@ -28,8 +28,9 @@ export const MODE_HINTS = {
 /**
  * @param {HTMLElement} panel
  * @param {import('../state/store.js').ReturnType<import('../state/store.js').createStore>} store
+ * @param {import('./animationController.js').createAnimationController} animationController
  */
-export function initToolbar(panel, store) {
+export function initToolbar(panel, store, animationController) {
   panel.querySelectorAll('.tool-btn[data-tool]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const dataTool = btn.dataset.tool;
@@ -37,6 +38,7 @@ export function initToolbar(panel, store) {
 
       if (dataTool === 'clear') {
         if (window.confirm('Очистить холст? Граф и маршрут будут удалены.')) {
+          animationController.stop();
           store.dispatch(ActionTypes.CLEAR_GRAPH);
         }
         return;

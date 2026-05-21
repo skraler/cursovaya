@@ -16,12 +16,36 @@ export const ActionTypes = Object.freeze({
   CLEAR_GRAPH: 'CLEAR_GRAPH',
   UPDATE_VERTEX_POSITION: 'UPDATE_VERTEX_POSITION',
   RESET_ANIMATION: 'RESET_ANIMATION',
+  PLAY_ROUTE_ANIMATION: 'PLAY_ROUTE_ANIMATION',
+  ANIMATION_TICK: 'ANIMATION_TICK',
+  STOP_ANIMATION: 'STOP_ANIMATION',
+  OPEN_EDGE_EDITOR: 'OPEN_EDGE_EDITOR',
+  UPDATE_EDGE: 'UPDATE_EDGE',
+  CANCEL_EDGE_EDITOR: 'CANCEL_EDGE_EDITOR',
+  VERTEX_DRAG_END: 'VERTEX_DRAG_END',
 });
 
 /**
  * @param {import('./AppState.js').AppState} state
  * @returns {import('./AppState.js').AppState}
  */
+/**
+ * @param {import('./AppState.js').AppState} state
+ * @returns {import('./AppState.js').AppState}
+ */
+function invalidateRoute(state) {
+  return {
+    ...state,
+    routeResult: null,
+    error: null,
+    animation: {
+      isPlaying: false,
+      stepIndex: 0,
+      highlightedEdgeId: null,
+    },
+  };
+}
+
 function cloneStateShell(state) {
   return {
     ...state,
@@ -109,6 +133,7 @@ export function reduce(state, type, payload = {}) {
       const next = cloneStateShell(state);
       next.toolMode = /** @type {string} */ (payload).mode ?? state.toolMode;
       next.edgeDraft = null;
+      next.editingEdgeId = null;
       return next;
     }
 
@@ -126,16 +151,16 @@ export function reduce(state, type, payload = {}) {
         vertexId,
       );
       state.graph.removeVertex(vertexId);
-      return {
+      return invalidateRoute({
         ...state,
         routePlan: { pointIds },
-        routeResult: null,
         error: null,
         edgeDraft:
           state.edgeDraft?.fromId === vertexId || state.edgeDraft?.toId === vertexId
             ? null
             : state.edgeDraft,
-      };
+        editingEdgeId: state.editingEdgeId === vertexId ? null : state.editingEdgeId,
+      });
     }
 
     case ActionTypes.EDGE_FIRST_CLICK: {
@@ -172,7 +197,12 @@ export function reduce(state, type, payload = {}) {
           weight,
           directed,
         );
-        return { ...state, edgeDraft: null, error: null };
+        return invalidateRoute({
+          ...state,
+          edgeDraft: null,
+          editingEdgeId: null,
+          error: null,
+        });
       } catch (err) {
         if (err instanceof GraphError) {
           return { ...state, error: err.message };
@@ -182,13 +212,50 @@ export function reduce(state, type, payload = {}) {
     }
 
     case ActionTypes.CANCEL_EDGE_DRAFT:
-      return { ...state, edgeDraft: null };
+      return { ...state, edgeDraft: null, editingEdgeId: null };
 
     case ActionTypes.REMOVE_EDGE: {
       const { edgeId } = /** @type {{ edgeId: string }} */ (payload);
       state.graph.removeEdge(edgeId);
-      return { ...state, routeResult: null, error: null };
+      return invalidateRoute({ ...state, error: null });
     }
+
+    case ActionTypes.OPEN_EDGE_EDITOR: {
+      const { edgeId } = /** @type {{ edgeId: string }} */ (payload);
+      return {
+        ...state,
+        edgeDraft: null,
+        editingEdgeId: edgeId,
+        error: null,
+      };
+    }
+
+    case ActionTypes.UPDATE_EDGE: {
+      const { edgeId, weight, directed } = /** @type {{
+        edgeId: string,
+        weight: number,
+        directed: boolean,
+      }} */ (payload);
+      try {
+        state.graph.updateEdge(edgeId, weight, directed);
+        return invalidateRoute({
+          ...state,
+          editingEdgeId: null,
+          error: null,
+        });
+      } catch (err) {
+        if (err instanceof GraphError) {
+          return { ...state, error: err.message };
+        }
+        throw err;
+      }
+    }
+
+    case ActionTypes.CANCEL_EDGE_EDITOR:
+      return { ...state, editingEdgeId: null };
+
+    case ActionTypes.VERTEX_DRAG_END:
+      return invalidateRoute(state);
 
     case ActionTypes.SET_ROUTE_POINT: {
       const { vertexId, role } = /** @type {{ vertexId: string, role: 'start' | 'waypoint' | 'finish' }} */ (
@@ -238,6 +305,7 @@ export function reduce(state, type, payload = {}) {
         routeResult: null,
         error: null,
         edgeDraft: null,
+        editingEdgeId: null,
         animation: {
           isPlaying: false,
           stepIndex: 0,
@@ -246,7 +314,47 @@ export function reduce(state, type, payload = {}) {
       };
     }
 
+    case ActionTypes.PLAY_ROUTE_ANIMATION: {
+      const edgeIds = state.routeResult?.fullPathEdgeIds ?? [];
+      if (!state.routeResult?.success || edgeIds.length === 0) {
+        return { ...state, error: 'Сначала постройте маршрут' };
+      }
+      return {
+        ...state,
+        error: null,
+        animation: {
+          isPlaying: true,
+          stepIndex: 0,
+          highlightedEdgeId: edgeIds[0],
+        },
+      };
+    }
+
+    case ActionTypes.ANIMATION_TICK: {
+      const edgeIds = state.routeResult?.fullPathEdgeIds ?? [];
+      const nextStep = state.animation.stepIndex + 1;
+      if (nextStep >= edgeIds.length) {
+        return {
+          ...state,
+          animation: {
+            isPlaying: false,
+            stepIndex: 0,
+            highlightedEdgeId: null,
+          },
+        };
+      }
+      return {
+        ...state,
+        animation: {
+          isPlaying: true,
+          stepIndex: nextStep,
+          highlightedEdgeId: edgeIds[nextStep],
+        },
+      };
+    }
+
     case ActionTypes.RESET_ANIMATION:
+    case ActionTypes.STOP_ANIMATION:
       return {
         ...state,
         animation: {

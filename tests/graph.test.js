@@ -115,6 +115,18 @@ describe('Graph', () => {
     expect(graph.adjacency.size).toBe(0);
   });
 
+  it('G10: updateEdge changes weight in adjacency', () => {
+    const graph = Graph.createEmpty();
+    const a = graph.addVertex(0, 0);
+    const b = graph.addVertex(100, 0);
+    const edge = graph.addEdge(a.id, b.id, 5, true);
+
+    graph.updateEdge(edge.id, 9, true);
+
+    expect(graph.edges.get(edge.id)?.weight).toBe(9);
+    expect(graph.getNeighbors(a.id)[0].weight).toBe(9);
+  });
+
   it('updateVertexPosition updates coordinates', () => {
     const graph = Graph.createEmpty();
     const v = graph.addVertex(1, 2);

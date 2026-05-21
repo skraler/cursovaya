@@ -8,9 +8,9 @@
 
 ## Текущий статус
 
-- **Текущий этап**: implement
-- **Текущий шаг реализации**: step-07-route-animation
-- **Прогресс реализации**: 6/8 шагов завершено (P1 завершён)
+- **Текущий этап**: implement (завершён)
+- **Текущий шаг реализации**: —
+- **Прогресс реализации**: 8/8 шагов завершено
 
 ## Навигация по решениям
 
@@ -101,12 +101,14 @@
 #### Шаг 07: Анимация маршрута
 - **Директория**: `.pldf/steps/step-07-route-animation/`
 - **Контекст планирования**: `.pldf/steps/step-07-route-animation/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-07-route-animation/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 08: Редактирование и очистка
 - **Директория**: `.pldf/steps/step-08-graph-editing/`
 - **Контекст планирования**: `.pldf/steps/step-08-graph-editing/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-08-graph-editing/implementation-context.md`
+- **Статус**: Завершен
 
 ---
 

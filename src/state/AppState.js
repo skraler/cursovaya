@@ -24,6 +24,7 @@ import { TOOL_MODES } from './toolModes.js';
  * @property {AnimationState} animation
  * @property {string | null} error
  * @property {EdgeDraft | null} edgeDraft
+ * @property {string | null} editingEdgeId
  */
 
 /**
@@ -49,5 +50,6 @@ export function createInitialState() {
     animation: createInitialAnimation(),
     error: null,
     edgeDraft: null,
+    editingEdgeId: null,
   };
 }

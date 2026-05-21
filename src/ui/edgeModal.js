@@ -11,22 +11,46 @@ export function initEdgeModal(overlay, store) {
   const btnCancel = overlay.querySelector('#modal-cancel');
   const btnOk = overlay.querySelector('#modal-ok');
 
-  btnCancel?.addEventListener('click', () => {
-    store.dispatch(ActionTypes.CANCEL_EDGE_DRAFT);
+  const close = () => {
     overlay.classList.remove('open');
+  };
+
+  btnCancel?.addEventListener('click', () => {
+    const state = store.getState();
+    if (state.editingEdgeId) {
+      store.dispatch(ActionTypes.CANCEL_EDGE_EDITOR);
+    } else {
+      store.dispatch(ActionTypes.CANCEL_EDGE_DRAFT);
+    }
+    close();
   });
 
   btnOk?.addEventListener('click', () => {
+    const state = store.getState();
     const weight = Number(weightInput?.value ?? 0);
     const directed = edgeTypeSelect?.value === 'directed';
-    store.dispatch(ActionTypes.CONFIRM_EDGE, { weight, directed });
-    overlay.classList.remove('open');
+
+    if (state.editingEdgeId) {
+      store.dispatch(ActionTypes.UPDATE_EDGE, {
+        edgeId: state.editingEdgeId,
+        weight,
+        directed,
+      });
+    } else {
+      store.dispatch(ActionTypes.CONFIRM_EDGE, { weight, directed });
+    }
+    close();
   });
 
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
-      store.dispatch(ActionTypes.CANCEL_EDGE_DRAFT);
-      overlay.classList.remove('open');
+      const state = store.getState();
+      if (state.editingEdgeId) {
+        store.dispatch(ActionTypes.CANCEL_EDGE_EDITOR);
+      } else {
+        store.dispatch(ActionTypes.CANCEL_EDGE_DRAFT);
+      }
+      close();
     }
   });
 
@@ -36,6 +60,29 @@ export function initEdgeModal(overlay, store) {
      */
     render(state) {
       const draft = state.edgeDraft;
+      const editingId = state.editingEdgeId;
+
+      if (editingId) {
+        const edge = state.graph.edges.get(editingId);
+        if (!edge) {
+          overlay.classList.remove('open');
+          return;
+        }
+        const from = state.graph.vertices.get(edge.fromId);
+        const to = state.graph.vertices.get(edge.toId);
+        if (title) {
+          title.textContent = `Редактировать ребро: ${from?.label ?? '?'} → ${to?.label ?? '?'}`;
+        }
+        if (weightInput) {
+          weightInput.value = String(edge.weight);
+        }
+        if (edgeTypeSelect) {
+          edgeTypeSelect.value = edge.directed ? 'directed' : 'undirected';
+        }
+        overlay.classList.add('open');
+        return;
+      }
+
       if (!draft?.fromId || !draft?.toId) {
         overlay.classList.remove('open');
         return;
@@ -45,6 +92,12 @@ export function initEdgeModal(overlay, store) {
       const to = state.graph.vertices.get(draft.toId);
       if (title) {
         title.textContent = `Новое ребро: ${from?.label ?? '?'} → ${to?.label ?? '?'}`;
+      }
+      if (weightInput) {
+        weightInput.value = '1';
+      }
+      if (edgeTypeSelect) {
+        edgeTypeSelect.value = 'undirected';
       }
       overlay.classList.add('open');
     },

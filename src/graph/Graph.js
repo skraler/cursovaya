@@ -5,6 +5,7 @@ import {
   getAdjacencyList,
   removeAdjacencyEntry,
   removeAllAdjacencyForVertex,
+  syncEdgeWeight,
 } from './adjacency.js';
 
 export class GraphError extends Error {
@@ -182,6 +183,32 @@ export class Graph {
     vertex.x = x;
     vertex.y = y;
     return vertex;
+  }
+
+  /**
+   * @param {string} edgeId
+   * @param {number} weight
+   * @param {boolean} directed
+   * @returns {import('./Edge.js').Edge}
+   */
+  updateEdge(edgeId, weight, directed) {
+    const edge = this.edges.get(edgeId);
+    if (!edge) {
+      throw new GraphError('EDGE_NOT_FOUND', 'Ребро не найдено');
+    }
+    if (weight < 0) {
+      throw new GraphError('INVALID_WEIGHT', 'Вес должен быть неотрицательным');
+    }
+
+    if (edge.directed === directed) {
+      edge.weight = weight;
+      syncEdgeWeight(this.adjacency, edgeId, weight);
+      return edge;
+    }
+
+    const { fromId, toId } = edge;
+    this.removeEdge(edgeId);
+    return this.addEdge(fromId, toId, weight, directed);
   }
 
   /**

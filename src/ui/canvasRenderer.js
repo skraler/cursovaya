@@ -69,8 +69,20 @@ export function initCanvasRenderer(canvasWrap, store) {
   const svg = /** @type {SVGSVGElement} */ (canvasWrap.querySelector('#graph-svg'));
   const hint = canvasWrap.querySelector('#mode-hint');
 
-  /** @type {{ vertexId: string } | null} */
+  /** @type {{ vertexId: string, moved: boolean } | null} */
   let dragState = null;
+
+  svg.addEventListener('dblclick', (event) => {
+    const edgeTarget = /** @type {SVGLineElement | null} */ (
+      event.target.closest('[data-edge-id]')
+    );
+    if (edgeTarget) {
+      event.preventDefault();
+      store.dispatch(ActionTypes.OPEN_EDGE_EDITOR, {
+        edgeId: edgeTarget.dataset.edgeId,
+      });
+    }
+  });
 
   svg.addEventListener('click', (event) => {
     const state = store.getState();
@@ -105,25 +117,11 @@ export function initCanvasRenderer(canvasWrap, store) {
       event.target.closest('[data-vertex-id]')
     );
     if (!vertexTarget) return;
-    dragState = { vertexId: vertexTarget.dataset.vertexId };
+    dragState = { vertexId: vertexTarget.dataset.vertexId, moved: false };
     event.preventDefault();
   });
 
-  window.addEventListener('mousemove', (event) => {
-    if (!dragState) return;
-    const { x, y } = clientToSvg(svg, event.clientX, event.clientY);
-    store.dispatch(ActionTypes.UPDATE_VERTEX_POSITION, {
-      vertexId: dragState.vertexId,
-      x: Math.max(0, Math.min(VIEWBOX.w, x)),
-      y: Math.max(0, Math.min(VIEWBOX.h, y)),
-    });
-  });
-
-  window.addEventListener('mouseup', () => {
-    dragState = null;
-  });
-
-  return {
+  const api = {
     render(state) {
       canvasWrap.dataset.tool = state.toolMode;
 
@@ -158,11 +156,12 @@ export function initCanvasRenderer(canvasWrap, store) {
         if (edge.directed) {
           line.setAttribute('marker-end', 'url(#arrow)');
         }
-        if (routeEdgeIds.has(edge.id)) {
+        if (state.animation.isPlaying) {
+          if (highlightedId === edge.id) {
+            line.classList.add('animated');
+          }
+        } else if (routeEdgeIds.has(edge.id)) {
           line.classList.add('route');
-        }
-        if (highlightedId === edge.id) {
-          line.classList.add('animated');
         }
 
         const label = document.createElementNS(SVG_NS, 'text');
@@ -202,6 +201,32 @@ export function initCanvasRenderer(canvasWrap, store) {
       }
     },
   };
+
+  window.addEventListener('mousemove', (event) => {
+    if (!dragState) return;
+    const { x, y } = clientToSvg(svg, event.clientX, event.clientY);
+    const graph = store.getState().graph;
+    try {
+      graph.updateVertexPosition(
+        dragState.vertexId,
+        Math.max(0, Math.min(VIEWBOX.w, x)),
+        Math.max(0, Math.min(VIEWBOX.h, y)),
+      );
+      dragState.moved = true;
+      api.render(store.getState());
+    } catch {
+      /* ignore invalid drag */
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (dragState?.moved) {
+      store.dispatch(ActionTypes.VERTEX_DRAG_END);
+    }
+    dragState = null;
+  });
+
+  return api;
 }
 
 /**

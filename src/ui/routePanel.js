@@ -18,23 +18,22 @@ function formatSegmentSummary(state) {
 }
 
 /**
+ * @param {import('./animationController.js').createAnimationController} animationController
  * @param {HTMLElement} panel
  * @param {import('../state/store.js').ReturnType<import('../state/store.js').createStore>} store
  */
-export function initRoutePanel(panel, store) {
+export function initRoutePanel(panel, store, animationController) {
   panel.querySelector('#btn-calc')?.addEventListener('click', () => {
+    animationController.stop();
     store.dispatch(ActionTypes.BUILD_ROUTE);
   });
 
   panel.querySelector('#btn-reset-anim')?.addEventListener('click', () => {
-    store.dispatch(ActionTypes.RESET_ANIMATION);
+    animationController.reset();
   });
 
   panel.querySelector('#btn-play')?.addEventListener('click', () => {
-    const status = panel.querySelector('#anim-status');
-    if (status) {
-      status.textContent = 'Анимация «Пуск» будет в шаге 07.';
-    }
+    animationController.play();
   });
 }
 
@@ -108,16 +107,19 @@ export function renderRoutePanel(state, panel) {
     }
   }
 
+  const edgeCount = state.routeResult?.fullPathEdgeIds?.length ?? 0;
+
   if (btnPlay) {
-    btnPlay.disabled = !state.routeResult?.success;
+    btnPlay.disabled = !state.routeResult?.success || state.animation.isPlaying;
   }
 
   if (animStatus) {
-    if (state.animation.isPlaying) {
-      animStatus.textContent = 'Анимация…';
+    if (state.animation.isPlaying && edgeCount > 0) {
+      const step = state.animation.stepIndex + 1;
+      animStatus.textContent = `Шаг ${step}/${edgeCount}: ребро подсвечено`;
     } else if (state.routeResult?.success) {
       animStatus.textContent =
-        'Маршрут построен. «Пуск» — в следующем шаге реализации.';
+        'Маршрут построен. Нажмите «Пуск» — рёбра поочерёдно закрасятся зелёным.';
     } else {
       animStatus.textContent =
         'Нажмите «Построить маршрут» после выбора старта и финиша.';
