@@ -1,6 +1,6 @@
 # Контекст проекта: Визуализатор кратчайших маршрутов
 
-**Последнее обновление**: 21.05.2026 (plan)
+**Последнее обновление**: 21.05.2026 (implement)
 
 ## Обзор проекта
 
@@ -8,9 +8,9 @@
 
 ## Текущий статус
 
-- **Текущий этап**: plan (завершён → implement)
-- **Текущий шаг реализации**: N/A
-- **Прогресс реализации**: 0/8 шагов завершено (план готов)
+- **Текущий этап**: implement
+- **Текущий шаг реализации**: step-07-route-animation
+- **Прогресс реализации**: 6/8 шагов завершено (P1 завершён)
 
 ## Навигация по решениям
 
@@ -65,32 +65,38 @@
 #### Шаг 01: Настройка проекта Vite + Vitest
 - **Директория**: `.pldf/steps/step-01-project-setup/`
 - **Контекст планирования**: `.pldf/steps/step-01-project-setup/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-01-project-setup/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 02: Модель графа и список смежности
 - **Директория**: `.pldf/steps/step-02-graph-model/`
 - **Контекст планирования**: `.pldf/steps/step-02-graph-model/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-02-graph-model/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 03: Дейкстра и построение маршрута
 - **Директория**: `.pldf/steps/step-03-dijkstra-route/`
 - **Контекст планирования**: `.pldf/steps/step-03-dijkstra-route/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-03-dijkstra-route/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 04: Store и actions
 - **Директория**: `.pldf/steps/step-04-app-store/`
 - **Контекст планирования**: `.pldf/steps/step-04-app-store/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-04-app-store/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 05: UI — рабочий экран
 - **Директория**: `.pldf/steps/step-05-ui-workspace/`
 - **Контекст планирования**: `.pldf/steps/step-05-ui-workspace/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-05-ui-workspace/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 06: SVG-холст (редактор + маршрут)
 - **Директория**: `.pldf/steps/step-06-svg-canvas/`
 - **Контекст планирования**: `.pldf/steps/step-06-svg-canvas/planning-context.md`
-- **Статус**: Запланирован
+- **Контекст реализации**: `.pldf/steps/step-06-svg-canvas/implementation-context.md`
+- **Статус**: Завершен
 
 #### Шаг 07: Анимация маршрута
 - **Директория**: `.pldf/steps/step-07-route-animation/`
