@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: Визуализатор маршрутов — внутренние контракты модулей
+  description: |
+    Клиентское SPA без backend. Пути описывают **логические операции** между UI и слоями
+    `graph` / `algorithms` / `state`, а не HTTP-эндпоинты.
+    Источник UI: `.pldf/ui-prototype/workspace.html`
+  version: 1.0.0
+
+servers: []
+
+tags:
+  - name: Graph
+    description: Редактор графа (P1, P2)
+  - name: Route
+    description: Маршрут и Дейкстра (P1)
+  - name: Animation
+    description: Анимация маршрута (P2)
+
+paths:
+  /internal/graph/vertices:
+    post:
+      tags: [Graph]
+      operationId: addVertex
+      summary: Добавить вершину (клик на холсте)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [x, y]
+              properties:
+                x: { type: number }
+                y: { type: number }
+      responses:
+        '200':
+          description: Вершина создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VertexResponse'
+
+  /internal/graph/vertices/{vertexId}:
+    delete:
+      tags: [Graph]
+      operationId: removeVertex
+      summary: Удалить вершину
+      parameters:
+        - name: vertexId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Удалено
+    patch:
+      tags: [Graph]
+      operationId: updateVertexPosition
+      summary: Переместить вершину
+      parameters:
+        - name: vertexId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                x: { type: number }
+                y: { type: number }
+      responses:
+        '200':
+          description: Позиция обновлена
+
+  /internal/graph/edges:
+    post:
+      tags: [Graph]
+      operationId: addEdge
+      summary: Добавить ребро (2 клика + модалка)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEdgeRequest'
+      responses:
+        '200':
+          description: Ребро создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdgeResponse'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /internal/graph/edges/{edgeId}:
+    delete:
+      tags: [Graph]
+      operationId: removeEdge
+      summary: Удалить ребро
+      parameters:
+        - name: edgeId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Удалено
+
+  /internal/graph/clear:
+    post:
+      tags: [Graph]
+      operationId: clearGraph
+      summary: Очистить холст
+      responses:
+        '200':
+          description: Граф очищен
+
+  /internal/route/points:
+    post:
+      tags: [Route]
+      operationId: setRoutePoint
+      summary: Назначить старт / остановку / финиш
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vertexId, role]
+              properties:
+                vertexId: { type: string }
+                role:
+                  type: string
+                  enum: [start, waypoint, finish]
+      responses:
+        '200':
+          description: Маршрут обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePlanResponse'
+
+  /internal/route/build:
+    post:
+      tags: [Route]
+      operationId: buildRoute
+      summary: Построить маршрут (Дейкстра по сегментам)
+      responses:
+        '200':
+          description: Маршрут рассчитан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResultResponse'
+        '422':
+          description: Недостижимый сегмент
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /internal/route/highlight/reset:
+    post:
+      tags: [Route]
+      operationId: resetRouteHighlight
+      summary: Сбросить подсветку анимации
+      responses:
+        '200':
+          description: Сброс выполнен
+
+  /internal/animation/play:
+    post:
+      tags: [Animation]
+      operationId: playRouteAnimation
+      summary: Пуск — пошаговая зелёная подсветка рёбер
+      responses:
+        '200':
+          description: Анимация запущена
+        '409':
+          description: Нет построенного маршрута
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /internal/animation/stop:
+    post:
+      tags: [Animation]
+      operationId: stopAnimation
+      summary: Остановить анимацию
+      responses:
+        '200':
+          description: Остановлено
+
+components:
+  schemas:
+    Vertex:
+      type: object
+      properties:
+        id: { type: string }
+        label: { type: string }
+        x: { type: number }
+        y: { type: number }
+        role:
+          type: string
+          enum: [none, start, waypoint, finish]
+    Edge:
+      type: object
+      properties:
+        id: { type: string }
+        fromId: { type: string }
+        toId: { type: string }
+        weight: { type: number, minimum: 0 }
+        directed: { type: boolean }
+    AddEdgeRequest:
+      type: object
+      required: [fromId, toId, weight, directed]
+      properties:
+        fromId: { type: string }
+        toId: { type: string }
+        weight: { type: number, minimum: 0 }
+        directed: { type: boolean }
+    RoutePlan:
+      type: object
+      properties:
+        pointIds:
+          type: array
+          items: { type: string }
+    RouteSegmentResult:
+      type: object
+      properties:
+        fromId: { type: string }
+        toId: { type: string }
+        pathVertexIds: { type: array, items: { type: string } }
+        pathEdgeIds: { type: array, items: { type: string } }
+        distance: { type: number }
+        reachable: { type: boolean }
+    RouteResult:
+      type: object
+      properties:
+        segments:
+          type: array
+          items: { $ref: '#/components/schemas/RouteSegmentResult' }
+        totalDistance: { type: number }
+        fullPathEdgeIds: { type: array, items: { type: string } }
+        fullPathVertexIds: { type: array, items: { type: string } }
+        success: { type: boolean }
+    VertexResponse:
+      type: object
+      properties:
+        vertex: { $ref: '#/components/schemas/Vertex' }
+    EdgeResponse:
+      type: object
+      properties:
+        edge: { $ref: '#/components/schemas/Edge' }
+    RoutePlanResponse:
+      type: object
+      properties:
+        routePlan: { $ref: '#/components/schemas/RoutePlan' }
+    RouteResultResponse:
+      type: object
+      properties:
+        routeResult: { $ref: '#/components/schemas/RouteResult' }
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+        code:
+          type: string
+          enum: [UNREACHABLE_SEGMENT, INVALID_WEIGHT, MISSING_ENDPOINTS]
