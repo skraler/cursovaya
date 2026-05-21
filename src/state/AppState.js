@@ -25,6 +25,7 @@ import { TOOL_MODES } from './toolModes.js';
  * @property {string | null} error
  * @property {EdgeDraft | null} edgeDraft
  * @property {string | null} editingEdgeId
+ * @property {boolean} routeHighlightActive — зелёная подсветка рёбер на холсте
  */
 
 /**
@@ -51,5 +52,6 @@ export function createInitialState() {
     error: null,
     edgeDraft: null,
     editingEdgeId: null,
+    routeHighlightActive: false,
   };
 }

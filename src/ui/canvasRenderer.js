@@ -1,6 +1,8 @@
 import { ActionTypes, TOOL_MODES, ROUTE_ROLES } from '../state/index.js';
 import { MODE_HINTS } from './toolbar.js';
-import { clientToSvg } from './svgCoords.js';
+import { clientToSvg, edgeGeometry } from './svgCoords.js';
+import { undirectedEdgeShapePoints } from './shapes/undirectedEdge.js';
+import { directedEdgeShapePoints } from './shapes/directedEdge.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const VIEWBOX = { w: 800, h: 520 };
@@ -56,11 +58,6 @@ export function initCanvasRenderer(canvasWrap, store) {
   canvasWrap.innerHTML = `
     <span class="canvas-hint" id="mode-hint"></span>
     <svg id="graph-svg" viewBox="0 0 ${VIEWBOX.w} ${VIEWBOX.h}" aria-label="Холст графа">
-      <defs>
-        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-          <path d="M0,0 L8,3 L0,6 Z" fill="#1e4a7a"/>
-        </marker>
-      </defs>
       <g id="edges-layer"></g>
       <g id="vertices-layer"></g>
     </svg>
@@ -73,13 +70,13 @@ export function initCanvasRenderer(canvasWrap, store) {
   let dragState = null;
 
   svg.addEventListener('dblclick', (event) => {
-    const edgeTarget = /** @type {SVGLineElement | null} */ (
-      event.target.closest('[data-edge-id]')
+    const edgeGroup = /** @type {SVGGElement | null} */ (
+      event.target.closest('.edge-group')
     );
-    if (edgeTarget) {
+    if (edgeGroup?.dataset.edgeId) {
       event.preventDefault();
       store.dispatch(ActionTypes.OPEN_EDGE_EDITOR, {
-        edgeId: edgeTarget.dataset.edgeId,
+        edgeId: edgeGroup.dataset.edgeId,
       });
     }
   });
@@ -89,8 +86,8 @@ export function initCanvasRenderer(canvasWrap, store) {
     const vertexTarget = /** @type {SVGElement | null} */ (
       event.target.closest('[data-vertex-id]')
     );
-    const edgeTarget = /** @type {SVGLineElement | null} */ (
-      event.target.closest('[data-edge-id]')
+    const edgeGroup = /** @type {SVGGElement | null} */ (
+      event.target.closest('.edge-group')
     );
 
     if (vertexTarget) {
@@ -98,14 +95,14 @@ export function initCanvasRenderer(canvasWrap, store) {
       return;
     }
 
-    if (edgeTarget && state.toolMode === TOOL_MODES.DELETE_EDGE) {
+    if (edgeGroup?.dataset.edgeId && state.toolMode === TOOL_MODES.DELETE_EDGE) {
       store.dispatch(ActionTypes.REMOVE_EDGE, {
-        edgeId: edgeTarget.dataset.edgeId,
+        edgeId: edgeGroup.dataset.edgeId,
       });
       return;
     }
 
-    if (!vertexTarget && !edgeTarget && state.toolMode === TOOL_MODES.VERTEX) {
+    if (!vertexTarget && !edgeGroup && state.toolMode === TOOL_MODES.VERTEX) {
       const { x, y } = clientToSvg(svg, event.clientX, event.clientY);
       store.dispatch(ActionTypes.ADD_VERTEX, { x, y });
     }
@@ -145,23 +142,31 @@ export function initCanvasRenderer(canvasWrap, store) {
         const to = state.graph.vertices.get(edge.toId);
         if (!from || !to) continue;
 
-        const line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('x1', String(from.x));
-        line.setAttribute('y1', String(from.y));
-        line.setAttribute('x2', String(to.x));
-        line.setAttribute('y2', String(to.y));
-        line.classList.add('edge-line');
-        line.dataset.edgeId = edge.id;
+        const geom = edgeGeometry(from, to, VERTEX_R);
+        const group = document.createElementNS(SVG_NS, 'g');
+        group.classList.add('edge-group');
+        group.classList.add(edge.directed ? 'edge-directed' : 'edge-undirected');
+        group.dataset.edgeId = edge.id;
 
+        const shape = document.createElementNS(SVG_NS, 'polygon');
         if (edge.directed) {
-          line.setAttribute('marker-end', 'url(#arrow)');
+          shape.setAttribute('points', directedEdgeShapePoints(geom));
+          shape.classList.add('edge-shape', 'edge-shape--directed');
+        } else {
+          shape.setAttribute('points', undirectedEdgeShapePoints(geom));
+          shape.classList.add('edge-shape', 'edge-shape--undirected');
         }
+        group.append(shape);
+
         if (state.animation.isPlaying) {
           if (highlightedId === edge.id) {
-            line.classList.add('animated');
+            group.classList.add('animated');
           }
-        } else if (routeEdgeIds.has(edge.id)) {
-          line.classList.add('route');
+        } else if (
+          state.routeHighlightActive &&
+          routeEdgeIds.has(edge.id)
+        ) {
+          group.classList.add('route');
         }
 
         const label = document.createElementNS(SVG_NS, 'text');
@@ -170,7 +175,7 @@ export function initCanvasRenderer(canvasWrap, store) {
         label.classList.add('edge-label');
         label.textContent = String(edge.weight);
 
-        edgesLayer.append(line, label);
+        edgesLayer.append(group, label);
       }
 
       for (const vertex of state.graph.vertices.values()) {

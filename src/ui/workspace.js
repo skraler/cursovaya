@@ -37,18 +37,18 @@ function createWorkspaceMarkup(root) {
 
   const toolsPanel = root.querySelector('#tools-panel');
   toolsPanel.innerHTML = `
-    <p class="panel-title">Инструменты · P1</p>
+    <p class="panel-title">Инструменты</p>
     <div class="tool-group">
       <button type="button" class="tool-btn active" data-tool="vertex">⊕ Вершина</button>
       <button type="button" class="tool-btn" data-tool="edge">⟷ Ребро (2 клика)</button>
     </div>
-    <p class="panel-title">Маршрут · P1</p>
+    <p class="panel-title">Маршрут</p>
     <div class="tool-group">
       <button type="button" class="tool-btn" data-tool="start">▶ Старт</button>
       <button type="button" class="tool-btn" data-tool="waypoint">◎ Остановка</button>
       <button type="button" class="tool-btn" data-tool="finish">■ Финиш</button>
     </div>
-    <p class="panel-title">Редактирование · P2</p>
+    <p class="panel-title">Редактирование</p>
     <div class="tool-group">
       <button type="button" class="tool-btn" data-tool="move">↔ Переместить</button>
       <button type="button" class="tool-btn" data-tool="delete-v">✕ Удалить вершину</button>

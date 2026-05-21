@@ -141,22 +141,33 @@ body {
   cursor: crosshair;
 }
 
-.edge-line {
-  stroke: var(--edge);
-  stroke-width: 2.5;
-  fill: none;
+.edge-group {
+  pointer-events: none;
+}
+
+.edge-group .edge-shape {
+  stroke: transparent;
+  stroke-width: 10;
   pointer-events: stroke;
-  transition: stroke 0.45s ease, stroke-width 0.3s ease;
+  transition: fill 0.45s ease, filter 0.3s ease;
 }
 
-.edge-line.route {
-  stroke: var(--edge-route);
-  stroke-width: 3.5;
+.edge-undirected .edge-shape--undirected {
+  fill: var(--edge);
 }
 
-.edge-line.animated {
-  stroke: var(--edge-anim);
-  stroke-width: 4;
+.edge-directed .edge-shape--directed {
+  fill: var(--edge);
+}
+
+.edge-group.route .edge-shape--undirected,
+.edge-group.route .edge-shape--directed {
+  fill: var(--edge-route);
+}
+
+.edge-group.animated .edge-shape--undirected,
+.edge-group.animated .edge-shape--directed {
+  fill: var(--edge-anim);
   filter: drop-shadow(0 0 3px rgba(60, 184, 104, 0.5));
 }
 

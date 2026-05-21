@@ -122,6 +122,28 @@ describe('store', () => {
     expect(listener.mock.calls[0][1]).toBe(ActionTypes.ADD_VERTEX);
   });
 
+  it('S10: RESET_ANIMATION hides route highlight flag', () => {
+    const store = createStore();
+    const { a, d } = buildDemoGraphInStore(store);
+
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: a.id,
+      role: 'start',
+    });
+    store.dispatch(ActionTypes.SET_ROUTE_POINT, {
+      vertexId: d.id,
+      role: 'finish',
+    });
+    store.dispatch(ActionTypes.BUILD_ROUTE);
+
+    expect(store.getState().routeHighlightActive).toBe(true);
+
+    store.dispatch(ActionTypes.RESET_ANIMATION);
+
+    expect(store.getState().routeHighlightActive).toBe(false);
+    expect(store.getState().routeResult?.success).toBe(true);
+  });
+
   it('S8: PLAY_ROUTE_ANIMATION and TICK advance animation', () => {
     const store = createStore();
     const { a, b, d } = buildDemoGraphInStore(store);

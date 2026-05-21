@@ -37,6 +37,7 @@ function invalidateRoute(state) {
   return {
     ...state,
     routeResult: null,
+    routeHighlightActive: false,
     error: null,
     animation: {
       isPlaying: false,
@@ -286,6 +287,7 @@ export function reduce(state, type, payload = {}) {
         return {
           ...state,
           routeResult,
+          routeHighlightActive: true,
           error: error ?? null,
           animation: { ...state.animation, isPlaying: false, stepIndex: 0, highlightedEdgeId: null },
         };
@@ -306,6 +308,7 @@ export function reduce(state, type, payload = {}) {
         error: null,
         edgeDraft: null,
         editingEdgeId: null,
+        routeHighlightActive: false,
         animation: {
           isPlaying: false,
           stepIndex: 0,
@@ -322,6 +325,7 @@ export function reduce(state, type, payload = {}) {
       return {
         ...state,
         error: null,
+        routeHighlightActive: false,
         animation: {
           isPlaying: true,
           stepIndex: 0,
@@ -336,6 +340,7 @@ export function reduce(state, type, payload = {}) {
       if (nextStep >= edgeIds.length) {
         return {
           ...state,
+          routeHighlightActive: true,
           animation: {
             isPlaying: false,
             stepIndex: 0,
@@ -354,6 +359,16 @@ export function reduce(state, type, payload = {}) {
     }
 
     case ActionTypes.RESET_ANIMATION:
+      return {
+        ...state,
+        routeHighlightActive: false,
+        animation: {
+          isPlaying: false,
+          stepIndex: 0,
+          highlightedEdgeId: null,
+        },
+      };
+
     case ActionTypes.STOP_ANIMATION:
       return {
         ...state,

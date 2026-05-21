@@ -118,8 +118,9 @@ export function renderRoutePanel(state, panel) {
       const step = state.animation.stepIndex + 1;
       animStatus.textContent = `Шаг ${step}/${edgeCount}: ребро подсвечено`;
     } else if (state.routeResult?.success) {
-      animStatus.textContent =
-        'Маршрут построен. Нажмите «Пуск» — рёбра поочерёдно закрасятся зелёным.';
+      animStatus.textContent = state.routeHighlightActive
+        ? 'Маршрут построен. Нажмите «Пуск» — рёбра поочерёдно закрасятся зелёным.'
+        : 'Подсветка сброшена. «Построить маршрут» или «Пуск» вернут зелёные рёбра.';
     } else {
       animStatus.textContent =
         'Нажмите «Построить маршрут» после выбора старта и финиша.';
